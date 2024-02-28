@@ -1,21 +1,13 @@
 import cv2
-import os
+import numpy as np
 from matplotlib import pyplot as plt
 from ultralytics import YOLO
 from ultralytics.utils.plotting import Annotator
 
-"""
-current_dir = os.path.dirname(__file__)
-model_files = [file for file in os.listdir(current_dir) if os.path.splitext(file)[1] == '.pt']
-
-try:
-    model_path = os.path.join(current_dir, model_files[0])
-    if len(model_files) > 1:
-        print(f"WARNING: More than one YOLO model found in '{current_dir}', currently using '{model_files[0]}'")
-except IndexError:
-    print(f"ERROR: No YOLO models found in '{current_dir}'")
-    raise SystemExit
-"""
+# Image size
+IMG_SIZE = (640, 480)
+# Control proportionality constant
+K_P = .5
 
 # Use pretrained nano model
 model = YOLO('yolov8n.pt')
@@ -37,12 +29,19 @@ while cap.isOpened():
         track_ids = results[0].boxes.id.int().cpu().tolist()
         annotator = Annotator(frame, line_width=2, example='test')
         
+        # Add bounding boxes, labels and centerpoints
         for box, track_id in zip(boxes, track_ids):
             annotator.box_label(box, label=f'Person {track_id}', color=(0, 255, 0))
             box = box.tolist()
             center_x = int((box[0] + box[2]) / 2)
             center_y = int((box[1] + box[3]) / 2)
             cv2.circle(frame, center=(center_x, center_y), radius=5, color=(0,0,255), thickness=-1)
+        
+        # No control unless exactly one person in frame
+        if len(track_ids) == 1:
+            err = center_x - IMG_SIZE[0] / 2
+            pwm = np.sign(err) * np.min([K_P * np.abs(err), 100])
+            print(pwm)
 
     cv2.imshow('Person tracker', frame)
 

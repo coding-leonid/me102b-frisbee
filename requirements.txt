@@ -1,3 +1,4 @@
+lapx
 ultralytics==8.0.228
 numpy
 opencv-python
