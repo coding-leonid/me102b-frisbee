@@ -3,3 +3,6 @@
 
 # Don't push pycaches
 __pycache__/
+
+# Don't push venv folders
+.venv/

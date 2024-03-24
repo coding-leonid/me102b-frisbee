@@ -4,7 +4,7 @@ import cv2
 import time
 
 client_socket = socket.socket()
-client_socket.connect(('10.0.0.98', 8000))
+client_socket.connect(('10.44.123.70', 8000))
 
 # Make a file-like object out of the connection
 connection = client_socket.makefile('wb')
