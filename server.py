@@ -8,19 +8,24 @@ import matplotlib.pyplot as plt
 from ultralytics import YOLO
 from ultralytics.utils.plotting import Annotator
 
-server_socket = socket.socket()
-server_socket.bind(('10.44.123.70', 8000))
-server_socket.listen(0)
+sender_socket = socket.socket()
+sender_socket.bind(('2607:f140:400:11e:7f37:e85f:5e9c:68a5', 8000))
+sender_socket.listen(0)
 
 # Accept a single connection and make a file-like object out of it
-connection = server_socket.accept()[0].makefile('rb')
+sender_connection = sender_socket.accept()[0].makefile('rb')
+
+# Create a socket for sending data back to the client
+client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+client_socket.connect(('2607:f140:400:108:5598:8aa3:7974:81ac', 8001))
+
 
 model = YOLO('yolov8n.pt')
 try:
     img = None
     while True:
         # Read the length of the image as a 32-bit unsigned int
-        image_len = struct.unpack('<L', connection.read(struct.calcsize('<L')))[0]
+        image_len = struct.unpack('<L', sender_connection.read(struct.calcsize('<L')))[0]
         #print(f'Read size: {image_len}')
         # If the length is zero, quit the loop
         if not image_len:
@@ -30,7 +35,7 @@ try:
         # Construct a stream to hold the image data and read the image
         # data from the connection
         image_stream = io.BytesIO()
-        image_stream.write(connection.read(image_len))
+        image_stream.write(sender_connection.read(image_len))
         # Rewind the stream and decode the image data
         image_stream.seek(0)
         data = np.frombuffer(image_stream.getvalue(), dtype=np.uint8)
@@ -54,7 +59,7 @@ try:
             
             # No control unless exactly one person in frame
             if len(track_ids) == 1:
-                print('Do control')
+                client_socket.sendall(str(center_x).encode())
 
         cv2.imshow('Person tracker', image)
 
@@ -66,6 +71,6 @@ except Exception as e:
     print(f'Exception caught: {e}')
 
 finally:
-    connection.close()
-    server_socket.close()
+    sender_connection.close()
+    sender_socket.close()
     print('Cleanup successful')
