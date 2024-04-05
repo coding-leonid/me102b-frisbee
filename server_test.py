@@ -9,27 +9,30 @@ import numpy as np
 from ultralytics import YOLO
 from ultralytics.utils.plotting import Annotator
 
+import settings
 
-def start_server(host, port):
+# Initialize global variables for scripts that are intended to run
+settings.init()
+
+def start_server(host: str, port: int):
+    # Create server socket, bind and start listening
     server_socket = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
     server_socket.bind((host, port))
     server_socket.listen(0)
-
     print(f"Server listening on IPV6 {host} port {port}")
-
+    # Load YOLOv8 nano model
     model = YOLO('yolov8n.pt')
-
     # Outer loop looking for connections, catches keyboard interrupts
     try:
         while True:
             client_socket, client_address = server_socket.accept()
             connection = client_socket.makefile('rb')
             print(f"Accepted connection from {client_address}")
-            # Inner loop sending and receiving messages, catches send/receive exceptions
+            # Inner loop sending and receiving messages, catches exceptions during send/receive
             try:
                 while True:
                     # Read the length of the image as a 32-bit unsigned int
-                    image_len = struct.unpack('<L', connection.read(struct.calcsize('<L')))[0]
+                    image_len: int = struct.unpack('<L', connection.read(struct.calcsize('<L')))[0]
                     print(f'Received image of size {image_len} bytes')
                     # If the length is zero, quit the loop
                     if not image_len:
@@ -44,10 +47,12 @@ def start_server(host, port):
                     image_stream.seek(0)
                     data = np.frombuffer(image_stream.getvalue(), dtype=np.uint8)
                     image = cv2.imdecode(data, 1)  # 1 means load color image
-
+                    # Do inference
                     results = model.track(image, persist=False, classes=[0], verbose=False)
                     # If we detect people, extract IDs, draw bounding boxes
-                    if results[0].boxes.id != None:
+                    if results[0].boxes.id == None:
+                        client_socket.send(str(69420).encode("utf-8"))
+                    else:
                         # Extract top left and bottom right corner
                         boxes = results[0].boxes.xyxy.cpu()
                         track_ids = results[0].boxes.id.int().cpu().tolist()
@@ -65,7 +70,7 @@ def start_server(host, port):
                         if len(track_ids) == 1:
                             client_socket.send(str(center_x).encode("utf-8"))
                         else:
-                            client_socket.send(str(-1).encode("utf-8"))
+                            client_socket.send(str(settings.INVALID_VALUE).encode("utf-8"))
 
                     cv2.imshow('Person tracker', image)
 
@@ -94,6 +99,6 @@ if __name__ == "__main__":
         print(f"Usage: python3 {os.path.basename(__file__)} <host> <port>")
         sys.exit(1)
     
-    host = sys.argv[1]
-    port = int(sys.argv[2])
+    host: str = sys.argv[1]
+    port: int = int(sys.argv[2])
     start_server(host, port)

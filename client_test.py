@@ -4,14 +4,27 @@ import cv2
 import sys
 import os
 import struct
+import threading
 
-def start_client(host, port):
+import settings
+import motor_control as mc
+
+# Initialize global variables for scripts that are intended to run
+settings.init()
+
+# Start the serial reader thread
+serial_thread = threading.Thread(target=mc.serial_reader)
+# Set the thread as daemon so it exits when the main thread exits
+serial_thread.daemon = True
+serial_thread.start()
+
+def start_client(host: str, port: int):
     # Outer loop trying to establish a connection, catches keyboard interrupts
     try:
         # Create a video capture with correct framerate and 
         cap = cv2.VideoCapture(0, apiPreference=cv2.CAP_V4L)
-        cap.set(cv2.CAP_PROP_FPS, 10)
-        cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+        cap.set(cv2.CAP_PROP_FPS, settings.CAM_FPS)
+        cap.set(cv2.CAP_PROP_FRAME_WIDTH, settings.IMG_WIDTH)
         while True:
             # Catches connection errors
             try:
@@ -27,29 +40,25 @@ def start_client(host, port):
             # Inner loop sending and receiving messages, catches send/receive errors
             try:
                 while True:
+                    # Capture frame
                     ret, frame = cap.read()
                     if not ret:
                         break
-
                     # Encode frame as jpeg
                     _, buffer = cv2.imencode('.jpg', frame)
-
                     # Get the size of the encoded frame
                     size = len(buffer)
-
                     # Send the size of the frame
                     client_socket.sendall(struct.pack('<L', size))
-
                     # Send the frame data
                     client_socket.sendall(buffer)
                     print(f'Sent image of size {size} bytes')
-
                     # Receive data from the server
-                    data = client_socket.recv(1024)  # Adjust buffer size as needed
+                    data = client_socket.recv(1024)
+                    # Process received data
                     if data:
-                        # Process received data
                         center_x = int(data.decode())
-                        print(f'Received yaw error: {center_x} pixels')
+                        print(f'Received yaw error: {"INVALID" if center_x == settings.INVALID_VALUE else center_x} pixels')
                     time.sleep(1/10)
                 
             except Exception as e:
@@ -64,10 +73,14 @@ def start_client(host, port):
         cap.release()
 
 if __name__ == "__main__":
+    # Check that the number of arguments is correct
     if len(sys.argv) != 3:
-        print(f"Usage: python3 {os.path.basename(__file__)} <host> <port>")
+        print(f"Usage: python3 {os.path.basename(__file__)} <ipv6-host> <port>")
         sys.exit(1)
     
-    host = sys.argv[1]
-    port = int(sys.argv[2])
+    # Set host and port
+    host: str = sys.argv[1]
+    port: int = int(sys.argv[2])
     start_client(host, port)
+    serial_thread.join()
+    print("Exited both threads successfully")
