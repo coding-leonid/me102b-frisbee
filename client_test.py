@@ -65,16 +65,21 @@ def start_client(host: str, port: int):
                     if data:
                         center_x = int(data.decode())
                         print(f'Received yaw error: {"INVALID" if center_x == settings.INVALID_VALUE else center_x} pixels')
+                        settings.YAW_ERR = int(center_x - settings.IMG_WIDTH / 2)
                         mc.yaw_control(pwm=pwm)
                     time.sleep(1/10)
                 
             except Exception as e:
                 print(f"Error handling server: {e}")
+                pwm.stop()
+                GPIO.cleanup()
                 client_socket.close()
 
     # Keyboard interrupt is the exit condition, final cleanup is here
     except KeyboardInterrupt:
         print("Client shutting down...")
+        pwm.stop()
+        GPIO.cleanup()
         connection.close()
         client_socket.close()
         cap.release()
