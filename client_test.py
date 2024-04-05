@@ -23,6 +23,7 @@ serial_thread.start()
 GPIO.setmode(GPIO.BOARD)
 GPIO.setup(settings.YAW_PWM_PIN, GPIO.OUT, initial=GPIO.HIGH)
 pwm = GPIO.PWM(settings.YAW_PWM_PIN, settings.PWM_FREQ)
+pwm.start(60) # Start in neutral
 
 def start_client(host: str, port: int):
     # Outer loop trying to establish a connection, catches keyboard interrupts
@@ -79,7 +80,6 @@ def start_client(host: str, port: int):
     except KeyboardInterrupt:
         print("Client shutting down...")
         pwm.stop()
-        GPIO.cleanup()
         connection.close()
         client_socket.close()
         cap.release()
@@ -95,4 +95,5 @@ if __name__ == "__main__":
     port: int = int(sys.argv[2])
     start_client(host, port)
     serial_thread.join()
+    GPIO.cleanup()
     print("Exited both threads successfully")

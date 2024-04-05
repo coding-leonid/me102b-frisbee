@@ -12,7 +12,7 @@ def init():
     # File address of the serial port
     SERIAL_FILE = "/dev/ttyUSB0"
     # Gain for yaw control
-    K_P_YAW = 0.1
+    K_P_YAW = 0.4
     # PWM pin for the yaw motor
     YAW_PWM_PIN = 32
     # PWM frequency (DO NOT TOUCH!!)
