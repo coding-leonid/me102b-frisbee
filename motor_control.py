@@ -1,5 +1,7 @@
 import numpy as np
 from serial import Serial
+import RPi.GPIO as GPIO
+
 import settings
 
 
@@ -46,8 +48,25 @@ def serial_reader():
             ser.close()
         print("Serial port closed")
 
-def yaw_control():
+
+def positive_yaw_pwm_map(percentage: float) -> int:
+    return int(60 + 39 * percentage / 100)
+
+def negative_yaw_pwm_map(percentage: float) -> int:
+    return int(60 - 2 * percentage / 5)
+
+def yaw_control(pwm: GPIO.PWM):
+    if settings.YAW_ERR == settings.INVALID_VALUE:
+        pwm.ChangeDutyCycle(60)
+        return
+    
     if settings.YAW_ERR > 0:
-        pass
+        output = min(settings.K_P_YAW * settings.YAW_ERR, 100.)
+        pwm_val = positive_yaw_pwm_map(output)
+        print(f"Commanded: {output}%")
     else:
-        pass
+        output = min(-settings.K_P_YAW * settings.YAW_ERR, 100.)
+        pwm_val = negative_yaw_pwm_map(output)
+        print(f"Commanded: -{output}%")
+
+    pwm.ChangeDutyCycle(pwm_val)

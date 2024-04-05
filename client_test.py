@@ -5,6 +5,7 @@ import sys
 import os
 import struct
 import threading
+import RPi.GPIO as GPIO
 
 import settings
 import motor_control as mc
@@ -17,6 +18,11 @@ serial_thread = threading.Thread(target=mc.serial_reader)
 # Set the thread as daemon so it exits when the main thread exits
 serial_thread.daemon = True
 serial_thread.start()
+
+# Initialize PWM object
+GPIO.setmode(GPIO.BOARD)
+GPIO.setup(settings.YAW_PWM_PIN, GPIO.OUT, initial=GPIO.HIGH)
+pwm = GPIO.PWM(settings.YAW_PWM_PIN, settings.PWM_FREQ)
 
 def start_client(host: str, port: int):
     # Outer loop trying to establish a connection, catches keyboard interrupts
@@ -59,6 +65,7 @@ def start_client(host: str, port: int):
                     if data:
                         center_x = int(data.decode())
                         print(f'Received yaw error: {"INVALID" if center_x == settings.INVALID_VALUE else center_x} pixels')
+                        mc.yaw_control(pwm=pwm)
                     time.sleep(1/10)
                 
             except Exception as e:

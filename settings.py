@@ -2,7 +2,7 @@ import threading
 
 def init():
     global RANGE, SHOULD_EXIT, IMG_WIDTH, INVALID_VALUE, SERIAL_FILE, \
-    YAW_ERR, CAM_FPS
+    YAW_ERR, CAM_FPS, K_P_YAW, YAW_PWM_PIN, PWM_FREQ
 
     """ ACTUAL SETTINGS """
     # Image width
@@ -13,6 +13,10 @@ def init():
     SERIAL_FILE = "/dev/ttyUSB0"
     # Gain for yaw control
     K_P_YAW = 0.1
+    # PWM pin for the yaw motor
+    YAW_PWM_PIN = 32
+    # PWM frequency (DO NOT TOUCH!!)
+    PWM_FREQ = 400
 
     """ GLOBAL VARIABLES """
     # Current range reading
