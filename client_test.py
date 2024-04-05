@@ -65,9 +65,12 @@ def start_client(host: str, port: int):
                     # Process received data
                     if data:
                         center_x = int(data.decode())
-                        print(f'Received yaw error: {"INVALID" if center_x == settings.INVALID_VALUE else center_x} pixels')
-                        settings.YAW_ERR = int(center_x - settings.IMG_WIDTH / 2)
-                        mc.yaw_control(pwm=pwm)
+                        if center_x == settings.INVALID_VALUE:
+                            print(f"Received yaw error: INVALID")
+                        else:
+                            print(f"Received center_x: {center_x} pixels")
+                            settings.YAW_ERR = int(center_x - settings.IMG_WIDTH / 2)
+                            mc.yaw_control(pwm=pwm)
                     time.sleep(1/10)
                 
             except Exception as e:
