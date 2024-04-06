@@ -6,6 +6,7 @@ import settings
 
 
 def serial_reader():
+    """Thread for taking measurements from the range sensor serial port"""
     try:
         # Open serial port
         ser : Serial = Serial(settings.SERIAL_FILE, baudrate=9600)
@@ -50,23 +51,29 @@ def serial_reader():
 
 
 def positive_yaw_pwm_map(percentage: float) -> int:
+    """Map to actual duty cycle value for positive rotation from a 0-100 range"""
     return int(60 + 39 * percentage / 100)
 
 def negative_yaw_pwm_map(percentage: float) -> int:
+    """Map to actual duty cycle value for negative rotation from a 0-100 range"""
     return int(60 - 2 * percentage / 5)
 
 def yaw_control(pwm: GPIO.PWM):
-    if settings.YAW_ERR == settings.INVALID_VALUE:
-        pwm.ChangeDutyCycle(60)
-        return
-    
+    # Control for positive error
     if settings.YAW_ERR > 0:
         output = min(settings.K_P_YAW * settings.YAW_ERR, 100.)
         pwm_val = positive_yaw_pwm_map(output)
         print(f"Commanded: {output}%")
-    else:
+    else: # Control for negative error
         output = min(-settings.K_P_YAW * settings.YAW_ERR, 100.)
         pwm_val = negative_yaw_pwm_map(output)
         print(f"Commanded: -{output}%")
 
+    # These values don't work for some reason...
+    if pwm_val == 92:
+        pwm_val = 91
+    elif pwm_val == 41:
+        pwm_val = 42
+
+    # Set the duty cycle
     pwm.ChangeDutyCycle(pwm_val)
