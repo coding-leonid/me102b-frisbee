@@ -70,6 +70,9 @@ def start_client(host: str, port: int):
                             print(f"Received center_x: {center_x} pixels")
                             # Error is defined as the distance from the center of the image
                             settings.YAW_ERR = int(center_x - settings.IMG_WIDTH / 2)
+                            # We have exited/are not in a stream of invalid values
+                            settings.YAW_RESET_TIMER = time.perf_counter()
+                            settings.YAW_IS_RESET = False
                             #print(settings.ENCODER_COUNT)
                     time.sleep(1/10)
                 

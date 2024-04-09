@@ -53,14 +53,19 @@ def esp32_thread():
         # Communicating with ESP32
         while True:
             # Update encoder count
-            settings.ENCODER_COUNT = int(esp32_ser.readline().decode().strip())
+            try:
+                settings.ENCODER_COUNT = int(esp32_ser.readline().decode().strip())
+            except ValueError:
+                pass
             # Update yaw command
             yaw_control()
+            #print(settings.ENCODER_COUNT)
             esp32_ser.write(f"{settings.YAW_CONTROL}\n".encode())
 
-            if settings.YAW_RESET_TIMER - time.perf_counter() > settings.YAW_TIMEOUT:
+            if not settings.YAW_IS_RESET and time.perf_counter() - settings.YAW_RESET_TIMER > settings.YAW_TIMEOUT:
                 # Holds up the code until finished!
                 reset_yaw()
+                settings.YAW_IS_RESET = True
 
             # Check for exit flag
             if settings.SHOULD_EXIT.is_set():
@@ -91,13 +96,15 @@ def yaw_control():
     # If invalid value, no control
     if settings.YAW_ERR == settings.INVALID_VALUE:
         settings.YAW_CONTROL = settings.MOTOR_NEUTRAL
+        return
     
     # If we are outside allowed limits, only control in the right direction
     # Checking abs. value and that error and encoder count and
     # that it wants to control in the opposite direction
-    if abs(settings.ENCODER_COUNT) >= settings.YAW_LIMIT and settings.ENCODER_COUNT * settings.YAW_ERR > 0:
+    if abs(settings.ENCODER_COUNT) >= settings.YAW_LIMIT and settings.ENCODER_COUNT * settings.YAW_ERR < 0:
         settings.YAW_CONTROL = settings.MOTOR_NEUTRAL
-        print("Outside yaw limits")
+        #print("Outside yaw limits")
+        return
 
     # Control for positive error
     if settings.YAW_ERR > 0:
