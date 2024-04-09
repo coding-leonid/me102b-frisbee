@@ -13,7 +13,7 @@ import motor_control as mc
 settings.init()
 
 # Start the range sensor thread
-range_thread = threading.Thread(target=mc.range_reader)
+range_thread = threading.Thread(target=mc.range_sensor_thread)
 esp32_thread = threading.Thread(target=mc.esp32_thread)
 # Set the threads as daemons so they exit when the main thread exits
 range_thread.daemon = True
@@ -70,7 +70,7 @@ def start_client(host: str, port: int):
                             print(f"Received center_x: {center_x} pixels")
                             # Error is defined as the distance from the center of the image
                             settings.YAW_ERR = int(center_x - settings.IMG_WIDTH / 2)
-                            print(settings.ENCODER_COUNT)
+                            #print(settings.ENCODER_COUNT)
                     time.sleep(1/10)
                 
             except Exception as e:

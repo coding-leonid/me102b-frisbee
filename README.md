@@ -17,3 +17,5 @@ Yaw motor:
 * 20 < p <= 58 => prop. reverse
 * 58 < p < 63 => neutral
 * 63 <= p < 100 => prop. forward    
+
+RPi IPV6 address: 2607:f140:400:12e:202c:a2ef:96f5:e671
