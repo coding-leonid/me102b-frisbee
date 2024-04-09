@@ -11,7 +11,7 @@ def init():
     # FPS of the camera video stream
     CAM_FPS = 10
     # File address of the range sensor serial port
-    RANGE_FILE = "/dev/ttyUSB0"
+    RANGE_FILE = "/dev/ttyUSB1"
     # File address of the ESP32 controller
     ESP32_FILE = "/dev/ttyUSB0"
     # Gain for yaw control
@@ -29,10 +29,10 @@ def init():
     # Flag for telling the serial thread to exit
     SHOULD_EXIT = threading.Event()
     # Current yaw error in pixels
-    YAW_ERR = int
+    YAW_ERR = 0
     # Integer value for not performing control / bogus distance measurements
     INVALID_VALUE = 69420 # Also used by the server!
     # Current control input for the yaw
     YAW_CONTROL = MOTOR_NEUTRAL
     # The current encoder count
-    ENCODER_COUNT = int
+    ENCODER_COUNT = 0

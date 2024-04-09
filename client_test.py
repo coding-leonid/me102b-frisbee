@@ -70,6 +70,7 @@ def start_client(host: str, port: int):
                             print(f"Received center_x: {center_x} pixels")
                             # Error is defined as the distance from the center of the image
                             settings.YAW_ERR = int(center_x - settings.IMG_WIDTH / 2)
+                            print(settings.ENCODER_COUNT)
                     time.sleep(1/10)
                 
             except Exception as e:
@@ -79,6 +80,7 @@ def start_client(host: str, port: int):
     # Keyboard interrupt is the exit condition, final cleanup is here
     except KeyboardInterrupt:
         print("Client shutting down...")
+        settings.SHOULD_EXIT.set()
         connection.close()
         client_socket.close()
         cap.release()
@@ -94,4 +96,5 @@ if __name__ == "__main__":
     port: int = int(sys.argv[2])
     start_client(host, port)
     range_thread.join()
-    print("Exited both threads successfully")
+    esp32_thread.join()
+    print("Exited all threads successfully")

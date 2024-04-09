@@ -35,12 +35,8 @@ def range_reader():
                 break
     # Handle any exceptions
     except Exception as e:
-        print(f"Exception thrown in range sensor thread: {e}")
-    
-    # Close port on keyboard interrupt
-    except KeyboardInterrupt:
-        range_ser.close()
-        print("Range port closed")
+        print(f"Exception thrown in range thread: {e}")
+
 
     # Close the port if something went wrong
     finally:
@@ -52,17 +48,20 @@ def range_reader():
 def esp32_thread():
     try:
         esp32_ser = Serial(settings.ESP32_FILE, baudrate=115200, timeout=1)
+        esp32_ser.write("reset\n".encode())
         while True:
-            settings.ENCODER_COUNT = int(esp32_ser.readline().decode().strip())
+            try:
+                settings.ENCODER_COUNT = esp32_ser.readline().decode().strip()
+            except:
+                pass
             yaw_control()
             esp32_ser.write(f"{settings.YAW_CONTROL}\n".encode())
+            if settings.SHOULD_EXIT.is_set():
+                esp32_ser.write(f"{settings.MOTOR_NEUTRAL}\n".encode())
+                break
     
     except Exception as e:
-        print(f"Exception thrown in range ESP32 thread: {e}")
-
-    except KeyboardInterrupt:
-        esp32_ser.close()
-        print("ESP32 port closed")
+        print(f"Exception thrown in ESP32 thread: {e}")
 
     finally:
         if 'esp32_ser' in locals() and esp32_ser.is_open:
@@ -87,8 +86,8 @@ def yaw_control():
     if settings.YAW_ERR > 0:
         output = min(settings.K_P_YAW * settings.YAW_ERR, 100.)
         settings.YAW_CONTROL = positive_yaw_pwm_map(output)
-        print(f"Commanded: {output}%")
+        #print(f"Commanded: {output}%")
     else: # Control for negative error
         output = min(-settings.K_P_YAW * settings.YAW_ERR, 100.)
         settings.YAW_CONTROL = negative_yaw_pwm_map(output)
-        print(f"Commanded: -{output}%")    
+        #print(f"Commanded: -{output}%")    
