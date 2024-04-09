@@ -5,7 +5,6 @@ import sys
 import os
 import struct
 import threading
-import RPi.GPIO as GPIO
 
 import settings
 import motor_control as mc
@@ -13,17 +12,15 @@ import motor_control as mc
 # Initialize global variables for scripts that are intended to run
 settings.init()
 
-# Start the serial reader thread
-serial_thread = threading.Thread(target=mc.serial_reader)
-# Set the thread as daemon so it exits when the main thread exits
-serial_thread.daemon = True
-serial_thread.start()
+# Start the range sensor thread
+range_thread = threading.Thread(target=mc.range_reader)
+esp32_thread = threading.Thread(target=mc.esp32_thread)
+# Set the threads as daemons so they exit when the main thread exits
+range_thread.daemon = True
+esp32_thread.daemon = True
+range_thread.start()
+esp32_thread.start()
 
-# Initialize PWM object
-GPIO.setmode(GPIO.BOARD)
-GPIO.setup(settings.YAW_PWM_PIN, GPIO.OUT, initial=GPIO.HIGH)
-pwm = GPIO.PWM(settings.YAW_PWM_PIN, settings.PWM_FREQ)
-pwm.start(60) # Start in neutral
 
 def start_client(host: str, port: int):
     # Outer loop trying to establish a connection, catches keyboard interrupts
@@ -68,25 +65,20 @@ def start_client(host: str, port: int):
                         # Only do control if received value is valid
                         if center_x == settings.INVALID_VALUE:
                             print(f"Received yaw error: INVALID")
-                            # Put the motor into neutral
-                            pwm.ChangeDutyCycle(60)
+                            settings.YAW_ERR = settings.INVALID_VALUE
                         else:
                             print(f"Received center_x: {center_x} pixels")
                             # Error is defined as the distance from the center of the image
                             settings.YAW_ERR = int(center_x - settings.IMG_WIDTH / 2)
-                            mc.yaw_control(pwm=pwm)
                     time.sleep(1/10)
                 
             except Exception as e:
                 print(f"Error handling server: {e}")
-                #pwm.stop() Throws exception!
-                GPIO.cleanup()
                 client_socket.close()
 
     # Keyboard interrupt is the exit condition, final cleanup is here
     except KeyboardInterrupt:
         print("Client shutting down...")
-        pwm.stop()
         connection.close()
         client_socket.close()
         cap.release()
@@ -101,6 +93,5 @@ if __name__ == "__main__":
     host: str = sys.argv[1]
     port: int = int(sys.argv[2])
     start_client(host, port)
-    serial_thread.join()
-    GPIO.cleanup()
+    range_thread.join()
     print("Exited both threads successfully")
