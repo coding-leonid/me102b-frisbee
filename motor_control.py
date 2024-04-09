@@ -1,22 +1,21 @@
 import numpy as np
 from serial import Serial
-import RPi.GPIO as GPIO
 
 import settings
 
 
-def serial_reader():
+def range_reader():
     """Thread for taking measurements from the range sensor serial port"""
     try:
         # Open serial port
-        ser : Serial = Serial(settings.SERIAL_FILE, baudrate=9600)
-        ser.timeout = 1.
+        range_ser : Serial = Serial(settings.RANGE_FILE, baudrate=9600)
+        range_ser.timeout = 1.
         while True:
             # Create a byte array to store received data
             data : bytearray = bytearray(11)
             # Read 11 bytes of data from the serial port
             for i in range(11):
-                byte = ser.read()
+                byte = range_ser.read()
                 if len(byte) == 0:
                     break
                 data[i] = ord(byte)
@@ -36,44 +35,60 @@ def serial_reader():
                 break
     # Handle any exceptions
     except Exception as e:
-        print(f"Exception thrown in serial thread: {e}")
+        print(f"Exception thrown in range sensor thread: {e}")
     
     # Close port on keyboard interrupt
     except KeyboardInterrupt:
-        ser.close()
-        print('Serial port closed')
+        range_ser.close()
+        print("Range port closed")
 
     # Close the port if something went wrong
     finally:
-        if 'ser' in locals() and ser.is_open:
-            ser.close()
-        print("Serial port closed")
+        if 'range_ser' in locals() and range_ser.is_open:
+            range_ser.close()
+        print("Range port closed")
 
+
+def esp32_thread():
+    try:
+        esp32_ser = Serial(settings.ESP32_FILE, baudrate=115200, timeout=1)
+        while True:
+            settings.ENCODER_COUNT = int(esp32_ser.readline().decode().strip())
+            yaw_control()
+            esp32_ser.write(f"{settings.YAW_CONTROL}\n".encode())
+    
+    except Exception as e:
+        print(f"Exception thrown in range ESP32 thread: {e}")
+
+    except KeyboardInterrupt:
+        esp32_ser.close()
+        print("ESP32 port closed")
+
+    finally:
+        if 'esp32_ser' in locals() and esp32_ser.is_open:
+            esp32_ser.close()
+        print("ESP32 port closed")
+        
 
 def positive_yaw_pwm_map(percentage: float) -> int:
     """Map to actual duty cycle value for positive rotation from a 0-100 range"""
-    return int(60 + 39 * percentage / 100)
+    return int(settings.MOTOR_NEUTRAL - 1.02 * percentage)
 
 def negative_yaw_pwm_map(percentage: float) -> int:
     """Map to actual duty cycle value for negative rotation from a 0-100 range"""
-    return int(60 - 2 * percentage / 5)
+    return int(settings.MOTOR_NEUTRAL + percentage)
 
-def yaw_control(pwm: GPIO.PWM):
+def yaw_control():
+    # Put motor into neutral if invalid value
+    if settings.YAW_ERR == settings.INVALID_VALUE:
+        settings.YAW_CONTROL = settings.MOTOR_NEUTRAL
+
     # Control for positive error
     if settings.YAW_ERR > 0:
         output = min(settings.K_P_YAW * settings.YAW_ERR, 100.)
-        pwm_val = positive_yaw_pwm_map(output)
+        settings.YAW_CONTROL = positive_yaw_pwm_map(output)
         print(f"Commanded: {output}%")
     else: # Control for negative error
         output = min(-settings.K_P_YAW * settings.YAW_ERR, 100.)
-        pwm_val = negative_yaw_pwm_map(output)
-        print(f"Commanded: -{output}%")
-
-    # These values don't work for some reason...
-    if pwm_val == 92:
-        pwm_val = 91
-    elif pwm_val == 41:
-        pwm_val = 42
-
-    # Set the duty cycle
-    pwm.ChangeDutyCycle(pwm_val)
+        settings.YAW_CONTROL = negative_yaw_pwm_map(output)
+        print(f"Commanded: -{output}%")    
