@@ -35,7 +35,7 @@ def range_sensor_thread():
 
             # Check if yaw error is within bounds
 
-            
+
 
             # Exit when exit flag is true
             if settings.SHOULD_EXIT.is_set():
@@ -66,19 +66,19 @@ def esp32_thread():
             # Update yaw command
             yaw_control()
             #print(settings.ENCODER_COUNT)
-            esp32_ser.write(f"{settings.YAW_CONTROL}\n".encode())
+            esp32_ser.write(f"y{settings.YAW_CONTROL}\n".encode())
 
             if not settings.YAW_IS_RESET and time.perf_counter() - settings.YAW_RESET_TIMER > settings.YAW_TIMEOUT:
                 # Holds up the code until finished!
-                reset_yaw()
+                esp32_ser.write("r\n".encode())
                 settings.YAW_IS_RESET = True
 
             # Check for exit flag
             if settings.SHOULD_EXIT.is_set():
                 # Reset yaw position (holds up the code!)
-                reset_yaw()
+                esp32_ser.write("r\n".encode())
                 # Set motor to neutral
-                esp32_ser.write(f"{settings.MOTOR_NEUTRAL}\n".encode())
+                esp32_ser.write(f"y{settings.MOTOR_NEUTRAL}\n".encode())
                 break
     
     except Exception as e:
