@@ -56,7 +56,7 @@ def start_server(host: str, port: int):
                         # Extract top left and bottom right corner
                         boxes = results[0].boxes.xyxy.cpu()
                         track_ids = results[0].boxes.id.int().cpu().tolist()
-                        annotator = Annotator(image, line_width=2, example='test')
+                        annotator = Annotator(image, line_width=2, example="test")
                         
                         # Add bounding boxes, labels and centerpoints
                         for box, track_id in zip(boxes, track_ids):
@@ -68,9 +68,9 @@ def start_server(host: str, port: int):
 
                         # No control unless exactly one person in frame
                         if len(track_ids) == 1:
-                            client_socket.send(str(center_x).encode("utf-8"))
+                            client_socket.send(f"{int(box[0])},{int(box[2])}".encode("utf-8"))
                         else:
-                            client_socket.send(str(settings.INVALID_VALUE).encode("utf-8"))
+                            client_socket.send(f"{settings.INVALID_VALUE},{settings.INVALID_VALUE}".encode("utf-8"))
 
                     cv2.imshow('Person tracker', image)
 

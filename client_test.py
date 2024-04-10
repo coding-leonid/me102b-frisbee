@@ -5,6 +5,7 @@ import sys
 import os
 import struct
 import threading
+import numpy as np
 
 import settings
 import motor_control as mc
@@ -61,13 +62,14 @@ def start_client(host: str, port: int):
                     data = client_socket.recv(1024)
                     # Process received data
                     if data:
-                        center_x = int(data.decode())
+                        bounds = [int(x) for x in data.decode().split(",")]
+                        center_x = np.mean(bounds)
                         # Only do control if received value is valid
-                        if center_x == settings.INVALID_VALUE:
+                        if bounds[0] == settings.INVALID_VALUE:
                             print(f"Received yaw error: INVALID")
                             settings.YAW_ERR = settings.INVALID_VALUE
                         else:
-                            print(f"Received center_x: {center_x} pixels")
+                            print(f"Received L = {bounds[0]}, R = {bounds[1]}")
                             # Error is defined as the distance from the center of the image
                             settings.YAW_ERR = int(center_x - settings.IMG_WIDTH / 2)
                             # We have exited/are not in a stream of invalid values
