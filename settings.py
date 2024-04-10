@@ -1,10 +1,11 @@
 import threading
+import time
 
 def init():
     global RANGE, SHOULD_EXIT, IMG_WIDTH, INVALID_VALUE, RANGE_FILE, \
     YAW_ERR, CAM_FPS, K_P_YAW, YAW_PWM_PIN, PWM_FREQ, ESP32_FILE, \
     MOTOR_NEUTRAL, YAW_CONTROL, ENCODER_COUNT, YAW_LIMIT, YAW_TIMEOUT, \
-    YAW_RESET_TIMER
+    YAW_RESET_TIMER, YAW_IS_RESET
 
     """ ACTUAL SETTINGS """
     # Image width
@@ -16,7 +17,7 @@ def init():
     # File address of the ESP32 controller
     ESP32_FILE = "/dev/ttyUSB0"
     # Gain for yaw control
-    K_P_YAW = .4
+    K_P_YAW = .3
     # PWM pin for the yaw motor
     YAW_PWM_PIN = 32
     # PWM frequency (DO NOT TOUCH!!)
@@ -24,13 +25,13 @@ def init():
     # Duty cycle value representing neutral motor control
     MOTOR_NEUTRAL = 153
     # Encoder count the yaw motor is limited to in each direction
-    YAW_LIMIT = 4000
+    YAW_LIMIT = 1000
     # How long [seconds] we accept invalid yaw errors until we reset the yaw
-    YAW_TIMEOUT = 5
+    YAW_TIMEOUT = 5.
 
     """ GLOBAL VARIABLES """
     # Current range reading
-    RANGE = 0
+    RANGE = 0.
     # Flag for telling the daemons to exit
     SHOULD_EXIT = threading.Event()
     # Current yaw error in pixels
@@ -39,7 +40,9 @@ def init():
     INVALID_VALUE = 69420 # Also used by the server!
     # Current control input for the yaw
     YAW_CONTROL = MOTOR_NEUTRAL
-    # The current encoder count
+    # The current encoder count (can encounter some weird values, ususally int)
     ENCODER_COUNT = 0
-    # Tracking how long we have been receiving invalid yaw errors
-    YAW_RESET_TIMER = 0
+    # Tracking how long we have been receiving invalid yaw errors (give some time to initialize)
+    YAW_RESET_TIMER = time.perf_counter() + YAW_TIMEOUT
+    # For flagging that a reset has been done (no need to do multiple resets)
+    YAW_IS_RESET = False
