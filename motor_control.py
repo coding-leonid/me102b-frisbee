@@ -29,8 +29,14 @@ def range_sensor_thread():
                 print("Distance measurement: INVALID")
             else:
                 print(f"Distance measurement: {distance}")
+            
             # Save the distance value
             settings.RANGE = distance
+
+            # Check if yaw error is within bounds
+
+            
+
             # Exit when exit flag is true
             if settings.SHOULD_EXIT.is_set():
                 break
