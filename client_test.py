@@ -40,6 +40,9 @@ def start_client(host: str, port: int):
             except socket.error as e:
                 print(f"Error while trying to connect: {e}")
                 print("Retrying in 5 seconds...")
+                # When connection is lost, make sure to invalidate all values
+                settings.RANGE = settings.INVALID_VALUE
+                settings.PERSON_BOUNDS = [settings.INVALID_VALUE, settings.INVALID_VALUE]
                 time.sleep(5)
                 continue
             # Inner loop sending and receiving messages, catches send/receive errors

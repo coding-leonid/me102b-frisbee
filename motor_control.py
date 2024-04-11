@@ -26,9 +26,10 @@ def range_sensor_thread():
             # Check for bogus value
             if distance > 100 or distance < 0:
                 distance = settings.INVALID_VALUE
-                print("Distance measurement: INVALID")
+                #print("Distance measurement: INVALID")
             else:
-                print(f"Distance measurement: {distance}")
+                #print(f"Distance measurement: {distance}")
+                pass
             
             # Save the distance value
             settings.RANGE = distance
