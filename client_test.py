@@ -57,19 +57,19 @@ def start_client(host: str, port: int):
                     client_socket.sendall(struct.pack('<L', size))
                     # Send the frame data
                     client_socket.sendall(buffer)
-                    print(f'Sent image of size {size} bytes')
+                    #print(f'Sent image of size {size} bytes')
                     # Receive data from the server
                     data = client_socket.recv(1024)
                     # Process received data
                     if data:
-                        bounds = [int(x) for x in data.decode().split(",")]
-                        center_x = np.mean(bounds)
+                        settings.PERSON_BOUNDS = [int(x) for x in data.decode().split(",")]
+                        center_x = np.mean(settings.PERSON_BOUNDS)
                         # Only do control if received value is valid
-                        if bounds[0] == settings.INVALID_VALUE:
+                        if settings.PERSON_BOUNDS[0] == settings.INVALID_VALUE:
                             print(f"Received yaw error: INVALID")
                             settings.YAW_ERR = settings.INVALID_VALUE
                         else:
-                            print(f"Received L = {bounds[0]}, R = {bounds[1]}")
+                            print(f"Received L = {settings.PERSON_BOUNDS[0]}, R = {settings.PERSON_BOUNDS[1]}, C = {center_x}")
                             # Error is defined as the distance from the center of the image
                             settings.YAW_ERR = int(center_x - settings.IMG_WIDTH / 2)
                             # We have exited/are not in a stream of invalid values

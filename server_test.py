@@ -51,7 +51,7 @@ def start_server(host: str, port: int):
                     results = model.track(image, persist=False, classes=[0], verbose=False)
                     # If we detect people, extract IDs, draw bounding boxes
                     if results[0].boxes.id == None:
-                        client_socket.send(str(69420).encode("utf-8"))
+                        client_socket.send(f"{settings.INVALID_VALUE},{settings.INVALID_VALUE}".encode("utf-8"))
                     else:
                         # Extract top left and bottom right corner
                         boxes = results[0].boxes.xyxy.cpu()

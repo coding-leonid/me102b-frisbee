@@ -33,9 +33,18 @@ def range_sensor_thread():
             # Save the distance value
             settings.RANGE = distance
 
+            # Calculate person width (NOTE: evaluates to zero if invalid)
+            person_width = settings.PERSON_BOUNDS[1] - settings.PERSON_BOUNDS[0]
             # Check if yaw error is within bounds
+            if person_width > 0 and abs(settings.YAW_ERR) < settings.GET_RANGE_PROP * person_width:
+                print("Waiting for range measurement...")
+                # Gather range measurements and save to list
 
+                # When sufficiently many measurements, send appropriate motor command
 
+                # Wait a little bit before sending the servo command to launch
+
+                # Clear list of measurements
 
             # Exit when exit flag is true
             if settings.SHOULD_EXIT.is_set():
