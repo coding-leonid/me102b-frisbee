@@ -29,7 +29,7 @@ def init():
     # How long [seconds] we accept invalid yaw errors until we reset the yaw
     YAW_TIMEOUT = 5.
     # Condition for considering the range sensor to be pointing at the person
-    GET_RANGE_PROP = .5
+    GET_RANGE_PROP = .45
 
     """ GLOBAL VARIABLES """
     # Current range reading
