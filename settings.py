@@ -49,4 +49,4 @@ def init():
     # For flagging that a reset has been done (no need to do multiple resets)
     YAW_IS_RESET = False
     # Bounding box x-values for the person
-    PERSON_BOUNDS = [0, 640]
+    PERSON_BOUNDS = [INVALID_VALUE, INVALID_VALUE]
