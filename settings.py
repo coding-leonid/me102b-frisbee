@@ -5,7 +5,8 @@ def init():
     global RANGE, SHOULD_EXIT, IMG_WIDTH, INVALID_VALUE, RANGE_FILE, \
     YAW_ERR, CAM_FPS, K_P_YAW, YAW_PWM_PIN, PWM_FREQ, ESP32_FILE, \
     MOTOR_NEUTRAL, YAW_CONTROL, ENCODER_COUNT, YAW_LIMIT, YAW_TIMEOUT, \
-    YAW_RESET_TIMER, YAW_IS_RESET, GET_RANGE_PROP, PERSON_BOUNDS
+    YAW_RESET_TIMER, YAW_IS_RESET, GET_RANGE_PROP, PERSON_BOUNDS, \
+    RANGE_VALS, SUFF_NUM_MEAS
 
     """ ACTUAL SETTINGS """
     # Image width
@@ -30,6 +31,8 @@ def init():
     YAW_TIMEOUT = 5.
     # Condition for considering the range sensor to be pointing at the person
     GET_RANGE_PROP = .45
+    # Sufficiently many measurements in order to fire
+    SUFF_NUM_MEAS = 5
 
     """ GLOBAL VARIABLES """
     # Current range reading
@@ -50,3 +53,5 @@ def init():
     YAW_IS_RESET = False
     # Bounding box x-values for the person
     PERSON_BOUNDS = [INVALID_VALUE, INVALID_VALUE]
+    # List for storing range measurements
+    RANGE_VALS = []

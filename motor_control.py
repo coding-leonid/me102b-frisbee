@@ -38,14 +38,13 @@ def range_sensor_thread():
             person_width = settings.PERSON_BOUNDS[1] - settings.PERSON_BOUNDS[0]
             # Check if yaw error is within bounds
             if person_width > 0 and abs(settings.YAW_ERR) < settings.GET_RANGE_PROP * person_width:
-                print("Waiting for range measurement...")
                 # Gather range measurements and save to list
-
-                # When sufficiently many measurements, send appropriate motor command
-
-                # Wait a little bit before sending the servo command to launch
-
-                # Clear list of measurements
+                settings.RANGE_VALS.append(settings.RANGE)
+                print(f"Gathered range measurement {len(settings.RANGE_VALS)}")
+                # When sufficiently many measurements, initiate firing sequence
+                if len(settings.RANGE_VALS) >= settings.SUFF_NUM_MEAS:
+                    print("Performing firing sequence")
+                    firing_seq()
 
             # Exit when exit flag is true
             if settings.SHOULD_EXIT.is_set():
@@ -130,8 +129,23 @@ def yaw_control():
     else: # Control for negative error
         output = min(-settings.K_P_YAW * settings.YAW_ERR, 100.)
         settings.YAW_CONTROL = negative_yaw_pwm_map(output)
-        #print(f"Commanded: -{output}%")    
+        #print(f"Commanded: -{output}%")
 
 
-def reset_yaw():
-    print("Reset yaw")
+def firing_seq():
+    """
+    Based on a list of range measurements, spool up
+    the motor and command the servo to fire the frisbee
+    """
+
+    # Calculate average distance
+    dist = np.mean(settings.RANGE_VALS)
+    
+    # Command motor to fire proportionally to the distance
+
+    # Wait a little bit
+
+    # Command the servo to fire
+
+    # Clear the measurement list
+    settings.RANGE_VALS.clear()
