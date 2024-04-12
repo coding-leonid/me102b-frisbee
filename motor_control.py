@@ -44,7 +44,10 @@ def range_sensor_thread():
                 # When sufficiently many measurements, initiate firing sequence
                 if len(settings.RANGE_VALS) >= settings.SUFF_NUM_MEAS:
                     print("Performing firing sequence")
-                    firing_seq()
+                    settings.FIRE_REQUEST = True
+            # If a single frame does not fulfill conditions, reset
+            else:
+                settings.RANGE_VALS.clear()
 
             # Exit when exit flag is true
             if settings.SHOULD_EXIT.is_set():
@@ -64,12 +67,31 @@ def esp32_thread():
     try:
         # Connect to ESP32 via serial port
         esp32_ser = Serial(settings.ESP32_FILE, baudrate=115200, timeout=1)
-        esp32_ser.write("reset\n".encode()) # Reset encoder count before starting! 
+        #esp32_ser.write("r\n".encode()) # Reset encoder count before starting! 
         # Communicating with ESP32
         while True:
+            # Check for exit flag
+            if settings.SHOULD_EXIT.is_set():
+                # Reset yaw position (holds up the code!)
+                esp32_ser.write("r\n".encode())
+                # Set motor to neutral
+                esp32_ser.write(f"y{settings.MOTOR_NEUTRAL}\n".encode())
+                break
+            
+            # Read from the ESP32
+            data = esp32_ser.readline().decode().strip()
+            # Reset firing flag when firing sequence is finished
+            if data == "d":
+                settings.FIRE_FINISHED = True
+            
+            # Incase fire request, perform firing sequence, skip rest of the loop
+            if settings.FIRE_REQUEST and not settings.FIRE_FINISHED:
+                esp32.write(f"{settings.FIRE_COMMAND}".encode())
+                continue
+            
             # Update encoder count
             try:
-                settings.ENCODER_COUNT = int(esp32_ser.readline().decode().strip())
+                settings.ENCODER_COUNT = int(data)
             except ValueError:
                 pass
             # Update yaw command
@@ -82,13 +104,7 @@ def esp32_thread():
                 esp32_ser.write("r\n".encode())
                 settings.YAW_IS_RESET = True
 
-            # Check for exit flag
-            if settings.SHOULD_EXIT.is_set():
-                # Reset yaw position (holds up the code!)
-                esp32_ser.write("r\n".encode())
-                # Set motor to neutral
-                esp32_ser.write(f"y{settings.MOTOR_NEUTRAL}\n".encode())
-                break
+            
     
     except Exception as e:
         print(f"Exception thrown in ESP32 thread: {e}")
