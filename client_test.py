@@ -69,10 +69,10 @@ def start_client(host: str, port: int):
                         center_x = np.mean(settings.PERSON_BOUNDS)
                         # Only do control if received value is valid
                         if settings.PERSON_BOUNDS[0] == settings.INVALID_VALUE:
-                            print(f"Received yaw error: INVALID")
+                            #print(f"Received yaw error: INVALID")
                             settings.YAW_ERR = settings.INVALID_VALUE
                         else:
-                            print(f"Received L = {settings.PERSON_BOUNDS[0]}, R = {settings.PERSON_BOUNDS[1]}, C = {center_x}")
+                            #print(f"Received L = {settings.PERSON_BOUNDS[0]}, R = {settings.PERSON_BOUNDS[1]}, C = {center_x}")
                             # Error is defined as the distance from the center of the image
                             settings.YAW_ERR = int(center_x - settings.IMG_WIDTH / 2)
                             # We have exited/are not in a stream of invalid values

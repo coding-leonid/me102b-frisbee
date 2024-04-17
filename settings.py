@@ -6,7 +6,8 @@ def init():
     YAW_ERR, CAM_FPS, K_P_YAW, YAW_PWM_PIN, PWM_FREQ, ESP32_FILE, \
     MOTOR_NEUTRAL, YAW_CONTROL, ENCODER_COUNT, YAW_LIMIT, YAW_TIMEOUT, \
     YAW_RESET_TIMER, YAW_IS_RESET, GET_RANGE_PROP, PERSON_BOUNDS, \
-    RANGE_VALS, SUFF_NUM_MEAS, FIRE_REQUEST, FIRE_COMMAND, FIRE_FINISHED
+    RANGE_VALS, SUFF_NUM_MEAS, FIRE_REQUEST, FIRE_COMMAND, FIRE_COOLDOWN, \
+    FIRE_TIMER
 
     """ ACTUAL SETTINGS """
     # Image width
@@ -56,8 +57,10 @@ def init():
     # List for storing range measurements
     RANGE_VALS = []
     # Flag set by range thread to order ESP32 thread to start firing sequence
-    FIRE_REQUEST = True
+    FIRE_REQUEST = False
     # Current PWM firing command
     FIRE_COMMAND = MOTOR_NEUTRAL
-    # Flag for informing when firing sequence is finished
-    FIRE_FINISHED = False
+    # Cooldown time between firings [s]
+    FIRE_COOLDOWN = 10
+    # Timer for enforcing firing cooldown time
+    FIRE_TIMER = time.perf_counter()

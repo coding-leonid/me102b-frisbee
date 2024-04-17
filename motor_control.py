@@ -35,15 +35,22 @@ def range_sensor_thread():
             settings.RANGE = distance
 
             # Calculate person width (NOTE: evaluates to zero if invalid)
-            person_width = settings.PERSON_BOUNDS[1] - settings.PERSON_BOUNDS[0]
+            #person_width = settings.PERSON_BOUNDS[1] - settings.PERSON_BOUNDS[0]
+            print(settings.YAW_ERR)
             # Check if yaw error is within bounds
-            if person_width > 0 and abs(settings.YAW_ERR) < settings.GET_RANGE_PROP * person_width:
+            if not settings.FIRE_REQUEST \
+               and time.perf_counter() > settings.FIRE_TIMER + settings.FIRE_COOLDOWN \
+               and abs(settings.YAW_ERR) < 10: # TODO: Add global variable
+                #and person_width > 0 \
+                #and abs(settings.YAW_ERR) < settings.GET_RANGE_PROP * person_width:
                 # Gather range measurements and save to list
                 settings.RANGE_VALS.append(settings.RANGE)
                 print(f"Gathered range measurement {len(settings.RANGE_VALS)}")
                 # When sufficiently many measurements, initiate firing sequence
                 if len(settings.RANGE_VALS) >= settings.SUFF_NUM_MEAS:
-                    print("Performing firing sequence")
+                    print("Firing request")
+                    # Compute the PWM value here!
+                    settings.FIRE_COMMAND = np.random.randint(50,150)
                     settings.FIRE_REQUEST = True
             # If a single frame does not fulfill conditions, reset
             else:
@@ -66,8 +73,9 @@ def range_sensor_thread():
 def esp32_thread():
     try:
         # Connect to ESP32 via serial port
-        esp32_ser = Serial(settings.ESP32_FILE, baudrate=115200, timeout=1)
-        #esp32_ser.write("r\n".encode()) # Reset encoder count before starting! 
+        esp32_ser = Serial(settings.ESP32_FILE, baudrate=115200, timeout=0.1)
+        #esp32_ser.write("r\n".encode()) # Reset encoder count before starting!
+        request_sent = False
         # Communicating with ESP32
         while True:
             # Check for exit flag
@@ -80,13 +88,20 @@ def esp32_thread():
             
             # Read from the ESP32
             data = esp32_ser.readline().decode().strip()
-            # Reset firing flag when firing sequence is finished
-            if data == "d":
-                settings.FIRE_FINISHED = True
+            # Reset firing flags when firing sequence is finished
+            if data == "f":
+                print("Firing finished")
+                settings.FIRE_REQUEST = False
+                request_sent = False
+                settings.FIRE_TIMER = time.perf_counter()
             
             # Incase fire request, perform firing sequence, skip rest of the loop
-            if settings.FIRE_REQUEST and not settings.FIRE_FINISHED:
-                esp32.write(f"{settings.FIRE_COMMAND}".encode())
+            if request_sent:
+                continue
+            if settings.FIRE_REQUEST and not request_sent:
+                print(f"Sent request with average distance {np.mean(settings.RANGE_VALS)}")
+                esp32_ser.write(f"f{settings.FIRE_COMMAND}".encode())
+                request_sent = True
                 continue
             
             # Update encoder count
@@ -97,8 +112,10 @@ def esp32_thread():
             # Update yaw command
             yaw_control()
             #print(settings.ENCODER_COUNT)
+            #print("Sent yaw command")
             esp32_ser.write(f"y{settings.YAW_CONTROL}\n".encode())
-
+            
+            # Reset yaw
             if not settings.YAW_IS_RESET and time.perf_counter() - settings.YAW_RESET_TIMER > settings.YAW_TIMEOUT:
                 # Holds up the code until finished!
                 esp32_ser.write("r\n".encode())
@@ -107,7 +124,7 @@ def esp32_thread():
             
     
     except Exception as e:
-        print(f"Exception thrown in ESP32 thread: {e}")
+       print(f"Exception thrown in ESP32 thread: {e}")
 
     finally:
         if "esp32_ser" in locals() and esp32_ser.is_open:
