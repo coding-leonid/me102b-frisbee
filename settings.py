@@ -11,7 +11,7 @@ def init():
 
     """ ACTUAL SETTINGS """
     # Image width
-    IMG_WIDTH = 640
+    IMG_WIDTH = 320
     # FPS of the camera video stream
     CAM_FPS = 10
     # File address of the range sensor serial port
@@ -19,7 +19,7 @@ def init():
     # File address of the ESP32 controller
     ESP32_FILE = "/dev/ttyUSB0"
     # Gain for yaw control
-    K_P_YAW = .3
+    K_P_YAW = .15
     # PWM pin for the yaw motor
     YAW_PWM_PIN = 32
     # PWM frequency (DO NOT TOUCH!!)
@@ -27,7 +27,7 @@ def init():
     # Duty cycle value representing neutral motor control
     MOTOR_NEUTRAL = 153
     # Encoder count the yaw motor is limited to in each direction
-    YAW_LIMIT = 1000
+    YAW_LIMIT = 100
     # How long [seconds] we accept invalid yaw errors until we reset the yaw
     YAW_TIMEOUT = 5.
     # Condition for considering the range sensor to be pointing at the person
