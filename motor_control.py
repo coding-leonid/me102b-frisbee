@@ -88,7 +88,6 @@ def esp32_thread():
             # Read from the ESP32
             data = esp32_ser.readline().decode().strip()
             # Reset firing flags when firing sequence is finished
-            request_sent = False
 
             if data == "f":
                 print("Firing finished")
@@ -137,11 +136,11 @@ def esp32_thread():
 
 def positive_yaw_pwm_map(percentage: float) -> int:
     """Map to actual duty cycle value for positive rotation from a 0-100 range"""
-    return int(140 - 0.70 * percentage) if percentage > 5 else settings.MOTOR_NEUTRAL
+    return int(150 - 0.20 * percentage) if percentage > 3 else settings.MOTOR_NEUTRAL
 
 def negative_yaw_pwm_map(percentage: float) -> int:
     """Map to actual duty cycle value for negative rotation from a 0-100 range"""
-    return int(170 + 0.70 * percentage) if percentage > 5 else settings.MOTOR_NEUTRAL
+    return int(160 + 0.20 * percentage) if percentage > 3 else settings.MOTOR_NEUTRAL
 
 def yaw_control():
     # If invalid value, no control
