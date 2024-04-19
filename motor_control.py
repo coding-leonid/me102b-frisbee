@@ -74,14 +74,13 @@ def esp32_thread():
     try:
         # Connect to ESP32 via serial port
         esp32_ser = Serial(settings.ESP32_FILE, baudrate=115200, timeout=0.1)
-        #esp32_ser.write("r\n".encode()) # Reset encoder count before starting!
         request_sent = False
         # Communicating with ESP32
         while True:
             # Check for exit flag
             if settings.SHOULD_EXIT.is_set():
                 # Reset yaw position (holds up the code!)
-                esp32_ser.write("r\n".encode())
+                #esp32_ser.write("r\n".encode())
                 # Set motor to neutral
                 esp32_ser.write(f"y{settings.MOTOR_NEUTRAL}\n".encode())
                 break
@@ -116,10 +115,12 @@ def esp32_thread():
             esp32_ser.write(f"y{settings.YAW_CONTROL}\n".encode())
             
             # Reset yaw
+            """
             if not settings.YAW_IS_RESET and time.perf_counter() - settings.YAW_RESET_TIMER > settings.YAW_TIMEOUT:
                 # Holds up the code until finished!
                 esp32_ser.write("r\n".encode())
                 settings.YAW_IS_RESET = True
+            """
 
             
     
@@ -151,7 +152,7 @@ def yaw_control():
     # that it wants to control in the opposite direction
     if abs(settings.ENCODER_COUNT) >= settings.YAW_LIMIT and settings.ENCODER_COUNT * settings.YAW_ERR < 0:
         settings.YAW_CONTROL = settings.MOTOR_NEUTRAL
-        #print("Outside yaw limits")
+        print("Outside yaw limits")
         return
 
     if abs(1e-6 * settings.YAW_INT + settings.YAW_ERR) < 100:
