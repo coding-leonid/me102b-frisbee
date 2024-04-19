@@ -100,8 +100,8 @@ def esp32_thread():
             if request_sent:
                 continue
             if settings.FIRE_REQUEST and not request_sent:
-                print(f"Sent request with average distance {np.mean(settings.RANGE_VALS)}")
-                esp32_ser.write(f"f{settings.FIRE_COMMAND}".encode())
+                #print(f"Sent request with average distance {np.mean(settings.RANGE_VALS)}")
+                #esp32_ser.write(f"f{settings.FIRE_COMMAND}".encode())
                 request_sent = True
                 continue
             
