@@ -19,7 +19,7 @@ def init():
     # File address of the ESP32 controller
     ESP32_FILE = "/dev/ttyUSB0"
     # Gain for yaw control
-    K_P_YAW = .15
+    K_P_YAW = .1
     # PWM pin for the yaw motor
     YAW_PWM_PIN = 32
     # PWM frequency (DO NOT TOUCH!!)

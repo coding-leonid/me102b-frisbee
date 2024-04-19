@@ -156,6 +156,7 @@ def yaw_control():
 
     if abs(1e-6 * settings.YAW_INT + settings.YAW_ERR) < 100:
         settings.YAW_INT += settings.YAW_ERR
+        print(settings.YAW_INT)
 
     output = .15 * settings.YAW_ERR + 1e-6 * settings.YAW_INT
 

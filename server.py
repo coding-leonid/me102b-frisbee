@@ -33,7 +33,7 @@ def start_server(host: str, port: int):
                 while True:
                     # Read the length of the image as a 32-bit unsigned int
                     image_len: int = struct.unpack('<L', connection.read(struct.calcsize('<L')))[0]
-                    print(f'Received image of size {image_len} bytes')
+                    #print(f'Received image of size {image_len} bytes')
                     # If the length is zero, quit the loop
                     if not image_len:
                         print('No image received, waiting...')
