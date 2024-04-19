@@ -160,8 +160,8 @@ def yaw_control():
     output = settings.K_P_YAW * settings.YAW_ERR \
         + settings.K_I_YAW * settings.YAW_INT \
         + settings.K_D_YAW * (settings.YAW_ERR - settings.PREV_YAW_ERR)
-    settings.PREV_YAW_ERR = settings.YAW_ERR
     print(settings.K_P_YAW * settings.YAW_ERR, settings.K_I_YAW * settings.YAW_INT, settings.K_D_YAW * (settings.YAW_ERR - settings.PREV_YAW_ERR))
+    settings.PREV_YAW_ERR = settings.YAW_ERR
 
     # Control in positive direction
     if output > 0:
