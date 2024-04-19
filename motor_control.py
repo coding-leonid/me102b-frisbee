@@ -40,7 +40,8 @@ def range_sensor_thread():
             # Check if yaw error is within bounds
             if not settings.FIRE_REQUEST \
                and time.perf_counter() > settings.FIRE_TIMER + settings.FIRE_COOLDOWN \
-               and abs(settings.YAW_ERR) < 10: # TODO: Add global variable
+               and abs(settings.YAW_ERR) < 10 \
+               and settings.RANGE != settings.INVALID_VALUE:
                 #and person_width > 0 \
                 #and abs(settings.YAW_ERR) < settings.GET_RANGE_PROP * person_width:
                 # Gather range measurements and save to list
