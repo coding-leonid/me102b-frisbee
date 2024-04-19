@@ -7,7 +7,7 @@ def init():
     MOTOR_NEUTRAL, YAW_CONTROL, ENCODER_COUNT, YAW_LIMIT, YAW_TIMEOUT, \
     YAW_RESET_TIMER, YAW_IS_RESET, GET_RANGE_PROP, PERSON_BOUNDS, \
     RANGE_VALS, SUFF_NUM_MEAS, FIRE_REQUEST, FIRE_COMMAND, FIRE_COOLDOWN, \
-    FIRE_TIMER, YAW_INT
+    FIRE_TIMER, YAW_INT, K_I_YAW
 
     """ ACTUAL SETTINGS """
     # Image width
@@ -18,8 +18,10 @@ def init():
     RANGE_FILE = "/dev/ttyUSB1"
     # File address of the ESP32 controller
     ESP32_FILE = "/dev/ttyUSB0"
-    # Gain for yaw control
+    # P-gain for yaw control
     K_P_YAW = .1
+    # I-gain for yaw control
+    K_I_YAW = 1e-4
     # PWM pin for the yaw motor
     YAW_PWM_PIN = 32
     # PWM frequency (DO NOT TOUCH!!)
@@ -27,7 +29,7 @@ def init():
     # Duty cycle value representing neutral motor control
     MOTOR_NEUTRAL = 153
     # Encoder count the yaw motor is limited to in each direction
-    YAW_LIMIT = 100
+    YAW_LIMIT = 1000
     # How long [seconds] we accept invalid yaw errors until we reset the yaw
     YAW_TIMEOUT = 5.
     # Condition for considering the range sensor to be pointing at the person

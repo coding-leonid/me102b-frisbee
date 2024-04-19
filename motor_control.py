@@ -155,11 +155,11 @@ def yaw_control():
         print("Outside yaw limits")
         return
 
-    if abs(1e-6 * settings.YAW_INT + settings.YAW_ERR) < 100:
+    if abs(settings.K_I_YAW * settings.YAW_INT + settings.YAW_ERR) < 100:
         settings.YAW_INT += settings.YAW_ERR
         print(settings.YAW_INT)
 
-    output = .15 * settings.YAW_ERR + 1e-6 * settings.YAW_INT
+    output = settings.K_P_YAW * settings.YAW_ERR + settings.K_I_YAW * settings.YAW_INT
 
     # Control in positive direction
     if output > 0:
