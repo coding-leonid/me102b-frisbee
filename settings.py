@@ -21,7 +21,7 @@ def init():
     # P-gain for yaw control
     K_P_YAW = .1
     # I-gain for yaw control
-    K_I_YAW = 1e-4
+    K_I_YAW = 1e-5
     # PWM pin for the yaw motor
     YAW_PWM_PIN = 32
     # PWM frequency (DO NOT TOUCH!!)
