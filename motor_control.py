@@ -36,7 +36,7 @@ def range_sensor_thread():
 
             # Calculate person width (NOTE: evaluates to zero if invalid)
             #person_width = settings.PERSON_BOUNDS[1] - settings.PERSON_BOUNDS[0]
-            print(settings.YAW_ERR)
+            #print(settings.YAW_ERR)
             # Check if yaw error is within bounds
             if not settings.FIRE_REQUEST \
                and time.perf_counter() > settings.FIRE_TIMER + settings.FIRE_COOLDOWN \
@@ -88,6 +88,8 @@ def esp32_thread():
             # Read from the ESP32
             data = esp32_ser.readline().decode().strip()
             # Reset firing flags when firing sequence is finished
+            request_sent = False
+
             if data == "f":
                 print("Firing finished")
                 settings.FIRE_REQUEST = False
