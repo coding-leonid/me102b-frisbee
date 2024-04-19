@@ -21,7 +21,7 @@ def init():
     # P-gain for yaw control
     K_P_YAW = .15
     # I-gain for yaw control
-    K_I_YAW = 3e-5
+    K_I_YAW = 2e-5
     # D-gain for yaw control
     K_D_YAW = .1
     # Previous yaw error value

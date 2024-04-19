@@ -114,7 +114,7 @@ def esp32_thread():
             # Update yaw command
             yaw_control()
             #print(settings.ENCODER_COUNT)
-            print(f"Sent yaw command {settings.YAW_CONTROL}")
+            #print(f"Sent yaw command {settings.YAW_CONTROL}")
             esp32_ser.write(f"y{settings.YAW_CONTROL}\n".encode())
 
             
@@ -130,11 +130,11 @@ def esp32_thread():
 
 def positive_yaw_pwm_map(percentage: float) -> int:
     """Map to actual duty cycle value for positive rotation from a 0-100 range"""
-    return int(150 - 0.15 * percentage) if percentage > 3 else settings.MOTOR_NEUTRAL
+    return int(150 - 0.12 * percentage) if percentage > 3 else settings.MOTOR_NEUTRAL
 
 def negative_yaw_pwm_map(percentage: float) -> int:
     """Map to actual duty cycle value for negative rotation from a 0-100 range"""
-    return int(160 + 0.15 * percentage) if percentage > 3 else settings.MOTOR_NEUTRAL
+    return int(160 + 0.12 * percentage) if percentage > 3 else settings.MOTOR_NEUTRAL
 
 def yaw_control():
     # If invalid value, no control
@@ -156,7 +156,6 @@ def yaw_control():
     # In case error changes sign, remove all integral windup
     if settings.YAW_INT * settings.YAW_ERR < 0:
         settings.YAW_INT = 0
-    
     output = settings.K_P_YAW * settings.YAW_ERR \
         + settings.K_I_YAW * settings.YAW_INT \
         + settings.K_D_YAW * (settings.YAW_ERR - settings.PREV_YAW_ERR)
