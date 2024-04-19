@@ -45,7 +45,7 @@ def range_sensor_thread():
                 #and abs(settings.YAW_ERR) < settings.GET_RANGE_PROP * person_width:
                 # Gather range measurements and save to list
                 settings.RANGE_VALS.append(settings.RANGE)
-                print(f"Gathered range measurement {len(settings.RANGE_VALS)}")
+                print(f"Gathered range measurement {settings.RANGE}")
                 # When sufficiently many measurements, initiate firing sequence
                 if len(settings.RANGE_VALS) >= settings.SUFF_NUM_MEAS:
                     print("Firing request")
