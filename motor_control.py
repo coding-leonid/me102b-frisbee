@@ -50,7 +50,7 @@ def range_sensor_thread():
                 if len(settings.RANGE_VALS) >= settings.SUFF_NUM_MEAS:
                     print("Firing request")
                     # Compute the PWM value here!
-                    settings.FIRE_COMMAND = np.random.randint(50,150)
+                    settings.FIRE_COMMAND = 70
                     settings.FIRE_REQUEST = True
             # If a single frame does not fulfill conditions, reset
             else:
@@ -74,13 +74,14 @@ def esp32_thread():
     try:
         # Connect to ESP32 via serial port
         esp32_ser = Serial(settings.ESP32_FILE, baudrate=115200, timeout=0.1)
+        esp32_ser.write("r\n".encode())
         request_sent = False
         # Communicating with ESP32
         while True:
             # Check for exit flag
             if settings.SHOULD_EXIT.is_set():
-                # Reset yaw position (holds up the code!)
-                #esp32_ser.write("r\n".encode())
+                # Reset yaw position
+                esp32_ser.write("r\n".encode())
                 # Set motor to neutral
                 esp32_ser.write(f"y{settings.MOTOR_NEUTRAL}\n".encode())
                 break
@@ -114,14 +115,6 @@ def esp32_thread():
             #print(settings.ENCODER_COUNT)
             #print("Sent yaw command")
             esp32_ser.write(f"y{settings.YAW_CONTROL}\n".encode())
-            
-            # Reset yaw
-            """
-            if not settings.YAW_IS_RESET and time.perf_counter() - settings.YAW_RESET_TIMER > settings.YAW_TIMEOUT:
-                # Holds up the code until finished!
-                esp32_ser.write("r\n".encode())
-                settings.YAW_IS_RESET = True
-            """
 
             
     
@@ -136,11 +129,11 @@ def esp32_thread():
 
 def positive_yaw_pwm_map(percentage: float) -> int:
     """Map to actual duty cycle value for positive rotation from a 0-100 range"""
-    return int(150 - 0.20 * percentage) if percentage > 3 else settings.MOTOR_NEUTRAL
+    return int(150 - 0.10 * percentage) if percentage > 3 else settings.MOTOR_NEUTRAL
 
 def negative_yaw_pwm_map(percentage: float) -> int:
     """Map to actual duty cycle value for negative rotation from a 0-100 range"""
-    return int(160 + 0.20 * percentage) if percentage > 3 else settings.MOTOR_NEUTRAL
+    return int(160 + 0.10 * percentage) if percentage > 3 else settings.MOTOR_NEUTRAL
 
 def yaw_control():
     # If invalid value, no control
@@ -162,8 +155,11 @@ def yaw_control():
     # In case error changes sign, remove all integral windup
     if settings.YAW_INT * settings.YAW_ERR < 0:
         settings.YAW_INT = 0
-
-    output = settings.K_P_YAW * settings.YAW_ERR + settings.K_I_YAW * settings.YAW_INT
+    
+    output = settings.K_P_YAW * settings.YAW_ERR \
+        + settings.K_I_YAW * settings.YAW_INT \
+        + settings.K_D_YAW * (settings.YAW_ERR - settings.PREV_YAW_ERR)
+    settings.PREV_YAW_ERR = settings.YAW_ERR
     print(settings.K_P_YAW * settings.YAW_ERR, settings.K_I_YAW * settings.YAW_INT)
 
     # Control in positive direction

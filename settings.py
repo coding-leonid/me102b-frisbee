@@ -7,7 +7,7 @@ def init():
     MOTOR_NEUTRAL, YAW_CONTROL, ENCODER_COUNT, YAW_LIMIT, YAW_TIMEOUT, \
     YAW_RESET_TIMER, YAW_IS_RESET, GET_RANGE_PROP, PERSON_BOUNDS, \
     RANGE_VALS, SUFF_NUM_MEAS, FIRE_REQUEST, FIRE_COMMAND, FIRE_COOLDOWN, \
-    FIRE_TIMER, YAW_INT, K_I_YAW
+    FIRE_TIMER, YAW_INT, K_I_YAW, K_D_YAW, PREV_YAW_ERR
 
     """ ACTUAL SETTINGS """
     # Image width
@@ -22,6 +22,10 @@ def init():
     K_P_YAW = .20
     # I-gain for yaw control
     K_I_YAW = 2e-5
+    # D-gain for yaw control
+    K_D_YAW = .1
+    # Previous yaw error value
+    PREV_YAW_ERR = 0
     # PWM pin for the yaw motor
     YAW_PWM_PIN = 32
     # PWM frequency (DO NOT TOUCH!!)
