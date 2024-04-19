@@ -21,7 +21,7 @@ def start_server(host: str, port: int):
     server_socket.listen(0)
     print(f"Server listening on IPV6 {host} port {port}")
     # Load YOLOv8 nano model
-    model = YOLO('yolov8n.pt')
+    model = YOLO('yolov8s.pt')
     # Outer loop looking for connections, catches keyboard interrupts
     try:
         while True:
