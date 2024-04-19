@@ -125,6 +125,7 @@ def esp32_thread():
     finally:
         if "esp32_ser" in locals() and esp32_ser.is_open:
             esp32_ser.close()
+            esp32_ser.write("f153".encode())
         print("ESP32 port closed")
         
 
