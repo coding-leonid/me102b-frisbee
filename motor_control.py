@@ -135,11 +135,11 @@ def esp32_thread():
 
 def positive_yaw_pwm_map(percentage: float) -> int:
     """Map to actual duty cycle value for positive rotation from a 0-100 range"""
-    return int(settings.MOTOR_NEUTRAL - 1.02 * percentage)
+    return int(130 - 1.02 * percentage)
 
 def negative_yaw_pwm_map(percentage: float) -> int:
     """Map to actual duty cycle value for negative rotation from a 0-100 range"""
-    return int(settings.MOTOR_NEUTRAL + percentage)
+    return int(190 + percentage)
 
 def yaw_control():
     # If invalid value, no control
