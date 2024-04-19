@@ -24,7 +24,7 @@ def range_sensor_thread():
             distance : float = (data[3] - 0x30) * 100 + (data[4] - 0x30) * 10 + (data[5] - 0x30) * 1 + \
                     (data[7] - 0x30) * 0.1 + (data[8] - 0x30) * 0.01 + (data[9] - 0x30) * 0.001
             # Check for bogus value
-            if distance > 100 or distance < 0:
+            if distance > 100 or distance < 0 or np.isnan(distance):
                 distance = settings.INVALID_VALUE
                 #print("Distance measurement: INVALID")
             else:
