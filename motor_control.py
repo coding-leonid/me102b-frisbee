@@ -154,13 +154,18 @@ def yaw_control():
         #print("Outside yaw limits")
         return
 
-    # Control for positive error
-    if settings.YAW_ERR > 0:
-        output = min(settings.K_P_YAW * settings.YAW_ERR, 100.)
+    if abs(1e-6 * settings.YAW_INT + settings.YAW_ERR) < 100:
+        settings.YAW_INT += settings.YAW_ERR
+
+    output = .15 * settings.YAW_ERR + 1e-6 * settings.YAW_INT
+
+    # Control in positive direction
+    if output > 0:
+        output = min(output, 100)
         settings.YAW_CONTROL = positive_yaw_pwm_map(output)
         #print(f"Commanded: {output}%")
-    else: # Control for negative error
-        output = min(-settings.K_P_YAW * settings.YAW_ERR, 100.)
+    else: # Control in negative direction
+        output = min(-output, 100.)
         settings.YAW_CONTROL = negative_yaw_pwm_map(output)
         #print(f"Commanded: -{output}%")
 

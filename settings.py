@@ -7,11 +7,11 @@ def init():
     MOTOR_NEUTRAL, YAW_CONTROL, ENCODER_COUNT, YAW_LIMIT, YAW_TIMEOUT, \
     YAW_RESET_TIMER, YAW_IS_RESET, GET_RANGE_PROP, PERSON_BOUNDS, \
     RANGE_VALS, SUFF_NUM_MEAS, FIRE_REQUEST, FIRE_COMMAND, FIRE_COOLDOWN, \
-    FIRE_TIMER
+    FIRE_TIMER, YAW_INT
 
     """ ACTUAL SETTINGS """
     # Image width
-    IMG_WIDTH = 320
+    IMG_WIDTH = 640
     # FPS of the camera video stream
     CAM_FPS = 10
     # File address of the range sensor serial port
@@ -64,3 +64,5 @@ def init():
     FIRE_COOLDOWN = 10
     # Timer for enforcing firing cooldown time
     FIRE_TIMER = time.perf_counter()
+    # Integral of YAW error
+    YAW_INT = 0
